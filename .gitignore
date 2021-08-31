@@ -15,3 +15,7 @@ tmp/
 
 # 3rd Party Repos
 ext/*
+
+# Text editor temp files
+*~
+
