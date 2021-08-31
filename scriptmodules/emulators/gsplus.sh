@@ -16,7 +16,7 @@ rp_module_id="gsplus"
 rp_module_desc="Apple IIgs emulator"
 rp_module_help="ROM Extensions: .dsk .po .2mg\n\nCopy your Apple II games to $romdir/$platform"
 rp_module_licence="GNU GPL"
-rp_module_repo="git https://github.com/digarok/GSplus master"
+rp_module_repo="git https://github.com/yoyodyne-research/GSplus retropie"
 rp_module_section="exp"
 rp_module_flags=""
 
