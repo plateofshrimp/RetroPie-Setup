@@ -17,42 +17,42 @@ rp_module_desc="Apple IIgs emulator"
 rp_module_help="ROM Extensions: .dsk .po .2mg\n\nCopy your Apple II games to $romdir/$platform"
 rp_module_licence="GNU GPL"
 #rp_module_repo="git file:///home/ray/Developer/gsplus retropie"
-rp_module_repo="git https://github.com/yoyodyne-research/gsplus.git retropie"
+rp_module_repo="git https://github.com/yoyodyne-research/gsplus retropie"
 rp_module_section="exp"
 rp_module_flags=""
 
 function depends_gsplus() {
-    local depends=(cmake libreadline-dev re2c "$@")
-
+    local depends=("$@")
+    # There are build deps, see below.
     getDepends "${depends[@]}"
 }
 
 function sources_gsplus() {
-    local revision="$1"
-    git clone "$md_repo_url" "$md_build"
+    gitPullOrClone
 }
 
 function build_gsplus() {
-    local params=()
+    local depends=(cmake libreadline-dev re2c "$@")
 
-    # add or override params from calling function
-    params+=("$@")
+    getDepends "${depends[@]}"
 
     [[ -d build ]] && rm -rf build
     mkdir build
+
     pushd build
-    # Note that the install prefix isn't exploited by this project,
+    # The install prefix isn't exploited by this project,
     # but maybe later...
     cmake .. -DCMAKE_INSTALL_PREFIX=/opt/retropie/emulators/$rp_module_id
     make -j 3
     popd
+
     md_ret_require="$md_build"
 }
 
 function install_gsplus() {
-    install -d "$md_inst/bin"
-    install build/bin/GSplus "$md_inst/bin"
-    make -C etc/retropie install
+#    install -d "$md_inst/bin"
+#    install $md_build/build/bin/GSplus "$md_inst/bin"
+    make -C $md_build/etc/retropie install
     md_ret_require="$md_inst/bin/GSplus"
 }
 
