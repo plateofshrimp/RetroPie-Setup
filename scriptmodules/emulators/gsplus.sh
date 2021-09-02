@@ -16,7 +16,8 @@ rp_module_id="gsplus"
 rp_module_desc="Apple IIgs emulator"
 rp_module_help="ROM Extensions: .dsk .po .2mg\n\nCopy your Apple II games to $romdir/$platform"
 rp_module_licence="GNU GPL"
-rp_module_repo="git https://github.com/yoyodyne-research/GSplus retropie"
+#rp_module_repo="git file:///home/ray/Developer/gsplus retropie"
+rp_module_repo="git https://github.com/yoyodyne-research/gsplus.git retropie"
 rp_module_section="exp"
 rp_module_flags=""
 
@@ -28,7 +29,6 @@ function depends_gsplus() {
 
 function sources_gsplus() {
     local revision="$1"
-    [[ -d "$md_build" ]] && return
     git clone "$md_repo_url" "$md_build"
 }
 
@@ -38,18 +38,22 @@ function build_gsplus() {
     # add or override params from calling function
     params+=("$@")
 
-    #    mkdir -p build/bin && cp /home/ray/Developer/gsplus/build/bin/GSplus build/bin
-
     [[ -d build ]] && rm -rf build
-    mkdir build && cd build && cmake .. && make -j 3
+    mkdir build
+    pushd build
+    # Note that the install prefix isn't exploited by this project,
+    # but maybe later...
+    cmake .. -DCMAKE_INSTALL_PREFIX=/opt/retropie/emulators/$rp_module_id
+    make -j 3
+    popd
     md_ret_require="$md_build"
 }
 
 function install_gsplus() {
-    install -d $md_inst/bin
-    install build/bin/GSplus "$md_inst/bin/gsplus"
-    cd etc/retropie && make install
-    md_ret_require="$md_inst/bin/$rp_module_id"
+    install -d "$md_inst/bin"
+    install build/bin/GSplus "$md_inst/bin"
+    make -C etc/retropie install
+    md_ret_require="$md_inst/bin/GSplus"
 }
 
 function configure_gsplus() {
@@ -59,15 +63,17 @@ function configure_gsplus() {
 
     mkRomDir "$platform"
 
-    addEmulator "$def" "$md_id" "$platform" "bash $romdir/$platform/${launcher_name// /\\ } %ROM%"
+    addEmulator "$def" "$md_id" "$platform" "$md_inst/gsplus.sh %ROM%"
     addSystem "$platform"
 
-#    rm -f "$romdir/$platform/$launcher_name"
-#    [[ "$md_mode" == "remove" ]] && return
-    if [ ! -f "$romdir/$platform/$launcher_name" ]
-    then
-	install etc/retropie/gsplus.sh "$romdir/$platform/$launcher_name"
-	chmod +x "$romdir/$platform/$launcher_name"
-	chown $user:$user "$romdir/$platform/$launcher_name"
-    fi
+    rm -f "$romdir/$platform/$launcher_name"
+    [[ "$md_mode" == "remove" ]] && return
+
+    cat > "$romdir/$platform/$launcher_name" << _EOF_
+#!/usr/bin/env bash
+$md_inst/gsplus.sh "\$1"
+_EOF_
+    
+    chmod +x "$romdir/$platform/$launcher_name"
+    chown $user:$user "$romdir/$platform/$launcher_name"
 }
