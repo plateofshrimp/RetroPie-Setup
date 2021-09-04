@@ -42,7 +42,7 @@ function build_gsplus() {
     pushd build
     # The install prefix isn't exploited by this project,
     # but maybe later...
-    cmake .. -DCMAKE_INSTALL_PREFIX=/opt/retropie/emulators/$rp_module_id
+    cmake .. -DDRIVER=SDL -DCMAKE_INSTALL_PREFIX=/opt/retropie/emulators/$rp_module_id
     make -j 3
     popd
 
